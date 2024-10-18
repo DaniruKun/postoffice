@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { PUBLIC_YOUGOTMAIL_API_BASE_URL } from '$env/static/public';
 	import { page } from '$app/stores';
+	import { playTrack } from '$lib/services/audio';
 
 	let author = '';
 	let content = '';
@@ -24,6 +25,7 @@
 
 		if (res.ok) {
 			console.log('Message sent successfully');
+			playTrack('/audio/imail-swoosh-effect.wav');
 			response = res;
 		} else {
 			console.error('Failed to send message:', await res.text());
