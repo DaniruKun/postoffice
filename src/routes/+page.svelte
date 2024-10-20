@@ -59,7 +59,7 @@
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 	};
 
-	const startDrawing = (event: MouseEvent) => {
+	const startDrawing = (event: MouseEvent | TouchEvent) => {
 		isDrawing = true;
 		draw(event);
 	};
@@ -69,12 +69,19 @@
 		ctx.beginPath();
 	};
 
-	const draw = (event: MouseEvent) => {
+	const draw = (event: MouseEvent | TouchEvent) => {
 		if (!isDrawing) return;
 
 		const rect = canvas.getBoundingClientRect();
-		const x = event.clientX - rect.left;
-		const y = event.clientY - rect.top;
+		let x: number, y: number;
+
+		if (event instanceof MouseEvent) {
+			x = event.clientX - rect.left;
+			y = event.clientY - rect.top;
+		} else {
+			x = event.touches[0].clientX - rect.left;
+			y = event.touches[0].clientY - rect.top;
+		}
 
 		ctx.strokeStyle = currentColor;
 		ctx.lineWidth = currentThickness;
@@ -98,22 +105,22 @@
 	<title>Cat Postoffice</title>
 </svelte:head>
 
-<section class="max-w-md mx-auto mt-8 p-6">
-	<h1 class="text-4xl font-bold tracking-tight text-center mb-4">Cat Postoffice 🐱</h1>
+<section class="max-w-md mx-auto p-6">
+	<h1 class="text-4xl font-bold tracking-tight text-center">Cat Postoffice 🐱</h1>
 </section>
 
 <form
 	on:submit|preventDefault={() => sendMessage(token)}
-	class="max-w-md mx-auto mt-8 p-6 bg-white rounded-lg shadow-md"
+	class="max-w-md mx-auto p-6 bg-white rounded-2xl shadow-md"
 >
 	<div class="mb-4">
 		<label class="block text-gray-700 text-sm font-bold mb-2" for="author"> Your name </label>
 		<input
 			type="text"
 			id="author"
-			placeholder="Andy"
+			placeholder="Ken"
 			bind:value={author}
-			class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+			class="shadow appearance-none border rounded-full w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
 		/>
 	</div>
 	<div class="mb-6" id="message-container">
@@ -127,8 +134,8 @@
 		<textarea
 			id="content"
 			bind:value={content}
-			placeholder="Hello, world!"
-			class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+			placeholder="prrr prrr pssss psssst"
+			class="shadow appearance-none border rounded-2xl w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
 		/>
 	</div>
 
@@ -190,6 +197,10 @@
 			on:mousemove={draw}
 			on:mouseup={stopDrawing}
 			on:mouseleave={stopDrawing}
+			on:touchstart|preventDefault={startDrawing}
+			on:touchmove|preventDefault={draw}
+			on:touchend|preventDefault={stopDrawing}
+			on:touchcancel|preventDefault={stopDrawing}
 		></canvas>
 	</div>
 
@@ -199,18 +210,34 @@
 			type="text"
 			id="token"
 			bind:value={token}
-			class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+			class="shadow appearance-none border rounded-full w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
 		/>
 	</div>
-	<div class="flex items-center justify-between">
+	<div class="flex flex-col items-center justify-between">
 		<button
 			type="submit"
-			class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+			class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full focus:outline-none focus:shadow-outline w-1/3"
 		>
-			Send
+			<span class="flex items-center justify-center gap-2">
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke-width="2"
+					stroke="currentColor"
+					class="size-4"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
+					/>
+				</svg>
+				Send
+			</span>
 		</button>
 		{#if response && response.ok}
-			<p class="text-green-600 mt-2">Message sent successfully!</p>
+			<p class="text-green-400 mt-2 font-semibold">Message sent successfully!</p>
 		{/if}
 	</div>
 </form>
